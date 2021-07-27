@@ -87,7 +87,9 @@ export const home = ({ navigation }) => {
 };
 
 export const mhA = ({ navigation, route }) => {
+  let infor = '';
   let [selectedImage, setSelectedImage] = React.useState(null);
+  let [selectInfor, setSelectedInfor] = React.useState(null);
   
   let handleImageChange = (e) => {
     setSelectedImage(e.target.files[0]);
@@ -106,10 +108,16 @@ export const mhA = ({ navigation, route }) => {
     })
         .then(res => {
           console.log(res.data);
+          infor = res.data;
+          setSelectedInfor(infor);
+          console.log(selectInfor)
+          
         })
-        .catch(err => console.log(err))
+        .catch(err => console.log(err)) 
+  
   }
   return (
+    
     <View style={styles.container}>
       <form onSubmit={handleSubmit}>
       <View style={styles.containerlayout}>
@@ -129,16 +137,16 @@ export const mhA = ({ navigation, route }) => {
           <Text style={styles.text2}>Thông tin trên căn cước công dân</Text>
           <View style={styles.row}>
             <Text style={{ marginRight: 45 }}>Số :</Text>
-            <TextInput
-              style={{
+            <Text style={{
                 height: 20,
                 width: 150,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
-              }}
-            />
+              }}>
+            {infor.name}
+            </Text>
           </View>
           <View style={styles.row}>
             <Text style={{ marginRight: 20 }}>Họ tên :</Text>
@@ -201,47 +209,33 @@ export const mhA = ({ navigation, route }) => {
 };
 
 const mhB = ({ navigation, route }) => {
+  let infor = '';
   let [selectedImage, setSelectedImage] = React.useState(null);
-  let openImagePickerAsync = async () => {
-    let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+  
+  let handleImageChange = (e) => {
+    setSelectedImage(e.target.files[0]);
+  }
 
-    if (permissionResult.granted === false) {
-      alert('Permission to access camera roll is required!');
-      return;
-    }
-
-    let pickerResult = await ImagePicker.launchImageLibraryAsync();
-    if (pickerResult.cancelled === true) {
-      return;
-    }
-    setSelectedImage({ localUri: pickerResult.uri });
-  };
-  let uploadImage = async () => {
-    let base_url = 'http://127.0.0.1:8000/gplx/';
-    let uploadData = new FormData();
-    uploadData.append('submit', 'ok');
-    uploadData.append('file', {
-      type: 'image/jpg',
-      uri: selectedImage,
-      name: 'uploadimagetmp.jpg',
-    });
-    fetch(base_url, {
-      method: 'post',
-      body: uploadData,
+  let handleSubmit = (e) =>{
+    e.preventDefault();
+    console.log(selectedImage);
+    let form_data = new FormData();
+    form_data.append('image',selectedImage, selectedImage.name);
+    let url = "http://127.0.0.1:8000/api/driving-license/";
+    axios.post(url, form_data, {
+      headers: {
+        'content-type': 'multipart/form-data'
+      }
     })
-      .then((response) => {
-        response.json;
-      })
-      .then((response) => {
-        if (response.status) {
-          Alert.alert('success');
-        } else {
-          Alert.alert('error', response.message);
-        }
-      });
-  };
+        .then(res => {
+          console.log(res.data);
+          infor = res.data;
+        })
+        .catch(err => console.log(err))
+  }
   return (
     <View style={styles.container}>
+      <form onSubmit={handleSubmit}>
       <View style={styles.containerlayout}>
         {selectedImage !== null ? (
           <Image
@@ -254,9 +248,7 @@ const mhB = ({ navigation, route }) => {
             style={{ width: 200, height: 130 }}
           />
         )}
-        <TouchableOpacity style={styles.button1} onPress={openImagePickerAsync}>
-          <Text style={styles.text1}>CHỌN FILE ẢNH TỪ MÁY</Text>
-        </TouchableOpacity>
+        <input type="file" id="image" accept="image/png ,image/jpeg" onChange={handleImageChange} required/>
         <View style={styles.form}>
           <Text style={styles.text2}>Thông tin trên giấy phép lái xe</Text>
           <View style={styles.row1}>
@@ -337,62 +329,43 @@ const mhB = ({ navigation, route }) => {
               }}
             />
           </View>
-          <TouchableOpacity style={styles.button2}>
-            <LinearGradient
-              colors={['seagreen', 'darkgreen', '#192f6a']}
-              style={styles.linearGradient1}>
-              <Text style={styles.text}>Trích Xuất</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          <input type="submit"/>
         </View>
       </View>
+      </form>
     </View>
   );
 };
 
 const mhC = ({ navigation, route }) => {
+  let infor = '';
   let [selectedImage, setSelectedImage] = React.useState(null);
-  let openImagePickerAsync = async () => {
-    let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+  
+  let handleImageChange = (e) => {
+    setSelectedImage(e.target.files[0]);
+  }
 
-    if (permissionResult.granted === false) {
-      alert('Permission to access camera roll is required!');
-      return;
-    }
-
-    let pickerResult = await ImagePicker.launchImageLibraryAsync();
-    if (pickerResult.cancelled === true) {
-      return;
-    }
-    setSelectedImage({ localUri: pickerResult.uri });
-  };
-  let uploadImage = async () => {
-    let base_url = 'http://127.0.0.1:8000/tsv/';
-    let uploadData = new FormData();
-    uploadData.append('submit', 'ok');
-    uploadData.append('file', {
-      type: 'image/jpg',
-      uri: selectedImage,
-      name: 'uploadimagetmp.jpg',
-    });
-    fetch(base_url, {
-      method: 'post',
-      body: uploadData,
+  let handleSubmit = (e) =>{
+    e.preventDefault();
+    console.log(selectedImage);
+    let form_data = new FormData();
+    form_data.append('image',selectedImage, selectedImage.name);
+    let url = "http://127.0.0.1:8000/api/student-card/";
+    axios.post(url, form_data, {
+      headers: {
+        'content-type': 'multipart/form-data'
+      }
     })
-      .then((response) => {
-        response.json;
-      })
-      .then((response) => {
-        if (response.status) {
-          Alert.alert('success');
-        } else {
-          Alert.alert('error', response.message);
-        }
-      });
-  };
+        .then(res => {
+          console.log(res.data);
+          infor = res.data;
+        })
+        .catch(err => console.log(err))
+  }
 
   return (
     <View style={styles.container}>
+      <form onSubmit={handleSubmit}>
       <View style={styles.containerlayout}>
         {selectedImage !== null ? (
           <Image
@@ -405,9 +378,7 @@ const mhC = ({ navigation, route }) => {
             style={{ width: 200, height: 130 }}
           />
         )}
-        <TouchableOpacity style={styles.button1} onPress={openImagePickerAsync}>
-          <Text style={styles.text1}>CHỌN FILE ẢNH TỪ MÁY</Text>
-        </TouchableOpacity>
+        <input type="file" id="image" accept="image/png ,image/jpeg" onChange={handleImageChange} required/>
         <View style={styles.form}>
           <Text style={styles.text2}>Thông tin trên thẻ sinh viên</Text>
           <View style={styles.row}>
@@ -475,15 +446,10 @@ const mhC = ({ navigation, route }) => {
               }}
             />
           </View>
-          <TouchableOpacity style={styles.button}>
-            <LinearGradient
-              colors={['seagreen', 'darkgreen', '#192f6a']}
-              style={styles.linearGradient1}>
-              <Text style={styles.text}>Trích Xuất</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          <input type="submit"/>
         </View>
       </View>
+      </form>
     </View>
   );
 };
