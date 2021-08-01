@@ -5,17 +5,15 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Button,
   Image,
-  Input,
-  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import DocumentPicker from 'react-native-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
 const Stack = createStackNavigator();
+
 
 export default class App extends React.Component {
   render() {
@@ -87,60 +85,52 @@ export const home = ({ navigation }) => {
 };
 
 export const mhA = ({ navigation, route }) => {
-  let [selectedImage, setSelectedImage] = React.useState(null);
-  let openImagePickerAsync = async () => {
-     // Ask the user for the permission to access the media library 
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  let [selectInfor, setSelectedInfor] = React.useState([]);
+  let [image, setImage] = React.useState(null);
 
-    if (permissionResult.granted === false) {
-      alert("You've refused to allow this appp to access your photos!");
-      return;
-    }
 
-    const result = await ImagePicker.launchImageLibraryAsync();
-
-    // Explore the result
-    console.log(result);
+  let pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
     if (!result.cancelled) {
-      setSelectedImage(result.uri);
-      console.log(result.uri);
+      setImage(result.uri);
     }
-    
   };
-  let uploadImage = async () => {
-    //Check if any file is selected or not
-    if (selectedImage != null) {
-      //If file selected then create FormData
-      const fileToUpload = selectedImage;
-      const data = new FormData();
-      data.append('image', 'Image Upload');
-      data.append('image', fileToUpload);
-      let res = await fetch(
-        'http://127.0.0.1:8000/api/id-card/',
-        {
-          method: 'post',
-          body: data,
-          headers: {
-            'Content-Type': 'multipart/form-data; ',
-          },
-        }
-      );
-      let responseJson = await res.json();
-      if (responseJson.status == 1) {
-        alert('Upload Successful');
+
+  let handleSubmit = (e) => {
+    e.preventDefault();
+    let form_data = new FormData();
+    form_data.append('image', {
+      uri: image,
+      name: 'test.jpg',
+      type: 'image/jpeg'
+    });
+    let url = "http://192.168.1.152:8000/api/id-card/";
+    // let url = "http://127.0.0.1:8000/api/id-card/";
+    axios.post(url, form_data, {
+      headers: {
+        'content-type': 'multipart/form-data'
       }
-    } else {
-      //if no file selected the show alert
-      alert('Please Select File first');
-    }
-  };
+    })
+        .then(res => {
+          console.log(res.data);
+          setSelectedInfor(res.data);
+        })
+        .catch(err => console.log(err)) 
+  }
+
+
   return (
     <View style={styles.container}>
       <View style={styles.containerlayout}>
-        {selectedImage !== null ? (
+        {image !== null ? (
           <Image
-            source={{ uri: selectedImage }}
+            source={{ uri: image }}
             style={styles.thumbnail}
           />
         ) : (
@@ -149,83 +139,137 @@ export const mhA = ({ navigation, route }) => {
             style={{ width: 200, height: 130 }}
           />
         )}
-        <TouchableOpacity style={styles.button1} onPress={openImagePickerAsync}>
-          <Text style={styles.text1}>CHỌN FILE ẢNH TỪ MÁY</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={pickImage}>
+          <LinearGradient
+            colors={['seagreen', 'darkgreen', '#192f6a']}
+            style={styles.linearGradient}>
+            <Text style={styles.text}>Upload File</Text>
+          </LinearGradient>
         </TouchableOpacity>
         <View style={styles.form}>
           <Text style={styles.text2}>Thông tin trên căn cước công dân</Text>
           <View style={styles.row}>
-            <Text style={{ marginRight: 45 }}>Số :</Text>
-            <TextInput
-              style={{
+            <Text style={{ marginRight: 65 }}>Số :</Text>
+            <TextInput selectTextOnFocus={false} style={{
                 height: 20,
-                width: 150,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.id_card_number}
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ marginRight: 20 }}>Họ tên :</Text>
-            <TextInput
+            <Text style={{ marginRight: 40 }}>Họ tên :</Text>
+            <TextInput selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 150,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+                value = {selectInfor.name}
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ marginRight: 2 }}>Ngày sinh :</Text>
-            <TextInput
+            <Text style={{ marginRight: 20 }}>Ngày sinh :</Text>
+            <TextInput selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 150,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.dob}
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ marginRight: 5 }}>Quê quán :</Text>
-            <TextInput
+            <Text style={{ marginRight: 30 }}>Giới tính :</Text>
+            <TextInput selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 150,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.sex}
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ marginRight: 27 }}>DCTT :</Text>
-            <TextInput
+            <Text style={{ marginRight: 22 }}>Quốc tịch :</Text>
+            <TextInput selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 150,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.nationality}
             />
           </View>
-          <TouchableOpacity style={styles.button} onPress={uploadImage}>
-            <LinearGradient
-              colors={['seagreen', 'darkgreen', '#192f6a']}
-              style={styles.linearGradient1}>
-              <Text style={styles.text}>Trích Xuất</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          <View style={styles.row}>
+            <Text style={{ marginRight: 20 }}>Quê quán :</Text>
+            <TextInput selectTextOnFocus={false}
+              style={{
+                height: 20,
+                width: 200,
+                borderColor: 'gray',
+                borderWidth: 1,
+                borderRadius: 5,
+                backgroundColor: '#D3D3D3',
+              }}
+              value = {selectInfor.hometown}
+            />
+          </View>
+          <View style={styles.row}>
+            <Text style={{ marginRight: 40 }}>ĐCTT :</Text>
+            <TextInput selectTextOnFocus={false}
+              style={{
+                height: 20,
+                width: 200,
+                borderColor: 'gray',
+                borderWidth: 1,
+                borderRadius: 5,
+                backgroundColor: '#D3D3D3',
+              }}
+              value = {selectInfor.address}
+            />
+          </View>
+          <View style={styles.row}>
+            <Text style={{ marginRight: 7 }}>Có giá trị đến :</Text>
+            <TextInput selectTextOnFocus={false}
+              style={{
+                height: 20,
+                width: 180,
+                borderColor: 'gray',
+                borderWidth: 1,
+                borderRadius: 5,
+                backgroundColor: '#D3D3D3',
+              }}
+              value = {selectInfor.expires}
+            />
+          </View>
+          <TouchableOpacity
+          style={styles.button}
+          onPress={handleSubmit}>
+          <LinearGradient
+            colors={['seagreen', 'darkgreen', '#192f6a']}
+            style={styles.linearGradient}>
+            <Text style={styles.text}>Trích xuất</Text>
+          </LinearGradient>
+        </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -233,51 +277,52 @@ export const mhA = ({ navigation, route }) => {
 };
 
 const mhB = ({ navigation, route }) => {
-  let [selectedImage, setSelectedImage] = React.useState(null);
-  let openImagePickerAsync = async () => {
-    let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+  let [selectInfor, setSelectedInfor] = React.useState([]);
+  let [image, setImage] = React.useState(null);
 
-    if (permissionResult.granted === false) {
-      alert('Permission to access camera roll is required!');
-      return;
-    }
 
-    let pickerResult = await ImagePicker.launchImageLibraryAsync();
-    if (pickerResult.cancelled === true) {
-      return;
-    }
-    setSelectedImage({ localUri: pickerResult.uri });
-  };
-  let uploadImage = async () => {
-    let base_url = 'http://127.0.0.1:8000/gplx/';
-    let uploadData = new FormData();
-    uploadData.append('submit', 'ok');
-    uploadData.append('file', {
-      type: 'image/jpg',
-      uri: selectedImage,
-      name: 'uploadimagetmp.jpg',
+  let pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
-    fetch(base_url, {
-      method: 'post',
-      body: uploadData,
-    })
-      .then((response) => {
-        response.json;
-      })
-      .then((response) => {
-        if (response.status) {
-          Alert.alert('success');
-        } else {
-          Alert.alert('error', response.message);
-        }
-      });
+
+    if (!result.cancelled) {
+      setImage(result.uri);
+    }
   };
+
+  let handleSubmit = (e) => {
+    e.preventDefault();
+    let form_data = new FormData();
+    form_data.append('image', {
+      uri: image,
+      name: 'test.jpg',
+      type: 'image/jpeg'
+    });
+    let url = "http://192.168.1.152:8000/api/id-card/";
+    // let url = "http://127.0.0.1:8000/api/id-card/";
+    axios.post(url, form_data, {
+      headers: {
+        'content-type': 'multipart/form-data'
+      }
+    })
+        .then(res => {
+          console.log(res.data);
+          setSelectedInfor(res.data);
+        })
+        .catch(err => console.log(err)) 
+  }
+
+
   return (
     <View style={styles.container}>
       <View style={styles.containerlayout}>
-        {selectedImage !== null ? (
+        {image !== null ? (
           <Image
-            source={{ uri: selectedImage.localUri }}
+            source={{ uri: image.localUri }}
             style={styles.thumbnail}
           />
         ) : (
@@ -286,17 +331,37 @@ const mhB = ({ navigation, route }) => {
             style={{ width: 200, height: 130 }}
           />
         )}
-        <TouchableOpacity style={styles.button1} onPress={openImagePickerAsync}>
-          <Text style={styles.text1}>CHỌN FILE ẢNH TỪ MÁY</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={pickImage}>
+          <LinearGradient
+            colors={['seagreen', 'darkgreen', '#192f6a']}
+            style={styles.linearGradient}>
+            <Text style={styles.text}>Upload File</Text>
+          </LinearGradient>
         </TouchableOpacity>
         <View style={styles.form}>
           <Text style={styles.text2}>Thông tin trên giấy phép lái xe</Text>
           <View style={styles.row1}>
-            <Text style={{ marginRight: 45 }}>Số :</Text>
-            <TextInput
+            <Text style={{ marginRight: 55 }}>Số :</Text>
+            <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 150,
+                width: 200,
+                borderColor: 'gray',
+                borderWidth: 1,
+                borderRadius: 5,
+                backgroundColor: '#D3D3D3',
+              }}
+              value = {selectInfor.id_card_number}
+            />
+          </View>
+          <View style={styles.row1}>
+            <Text style={{ marginRight: 30 }}>Họ tên :</Text>
+            <TextInput  selectTextOnFocus={false}
+              style={{
+                height: 20,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
@@ -305,76 +370,69 @@ const mhB = ({ navigation, route }) => {
             />
           </View>
           <View style={styles.row1}>
-            <Text style={{ marginRight: 20 }}>Họ tên :</Text>
-            <TextInput
+            <Text style={{ marginRight: 15 }}>Ngày sinh:</Text>
+            <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 150,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.id_card_number}
             />
           </View>
           <View style={styles.row1}>
-            <Text style={{ marginRight: 5 }}>Ngày sinh:</Text>
-            <TextInput
+            <Text style={{ marginRight: 15 }}>Quốc tịch:</Text>
+            <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 150,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.id_card_number}
             />
           </View>
           <View style={styles.row1}>
-            <Text style={{ marginRight: 5 }}>Quốc tịch:</Text>
-            <TextInput
+            <Text style={{ marginRight: 15 }}>Nơi cư trú:</Text>
+            <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 150,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.id_card_number}
             />
           </View>
           <View style={styles.row1}>
-            <Text style={{ marginRight: 5 }}>Nơi cư trú:</Text>
-            <TextInput
+            <Text style={{ marginRight: 35 }}>Hạng :</Text>
+            <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 150,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.id_card_number}
             />
           </View>
-          <View style={styles.row1}>
-            <Text style={{ marginRight: 28 }}>Hạng :</Text>
-            <TextInput
-              style={{
-                height: 20,
-                width: 150,
-                borderColor: 'gray',
-                borderWidth: 1,
-                borderRadius: 5,
-                backgroundColor: '#D3D3D3',
-              }}
-            />
-          </View>
-          <TouchableOpacity style={styles.button2}>
-            <LinearGradient
-              colors={['seagreen', 'darkgreen', '#192f6a']}
-              style={styles.linearGradient1}>
-              <Text style={styles.text}>Trích Xuất</Text>
-            </LinearGradient>
+           <TouchableOpacity
+          style={styles.button}
+          onPress={handleSubmit}>
+          <LinearGradient
+            colors={['seagreen', 'darkgreen', '#192f6a']}
+            style={styles.linearGradient}>
+            <Text style={styles.text}>Trích xuất</Text>
+          </LinearGradient>
           </TouchableOpacity>
         </View>
       </View>
@@ -383,52 +441,54 @@ const mhB = ({ navigation, route }) => {
 };
 
 const mhC = ({ navigation, route }) => {
-  let [selectedImage, setSelectedImage] = React.useState(null);
-  let openImagePickerAsync = async () => {
-    let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+  let [selectInfor, setSelectedInfor] = React.useState([]);
+  let [image, setImage] = React.useState(null);
 
-    if (permissionResult.granted === false) {
-      alert('Permission to access camera roll is required!');
-      return;
-    }
 
-    let pickerResult = await ImagePicker.launchImageLibraryAsync();
-    if (pickerResult.cancelled === true) {
-      return;
-    }
-    setSelectedImage({ localUri: pickerResult.uri });
-  };
-  let uploadImage = async () => {
-    let base_url = 'http://127.0.0.1:8000/tsv/';
-    let uploadData = new FormData();
-    uploadData.append('submit', 'ok');
-    uploadData.append('file', {
-      type: 'image/jpg',
-      uri: selectedImage,
-      name: 'uploadimagetmp.jpg',
+  let pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
-    fetch(base_url, {
-      method: 'post',
-      body: uploadData,
-    })
-      .then((response) => {
-        response.json;
-      })
-      .then((response) => {
-        if (response.status) {
-          Alert.alert('success');
-        } else {
-          Alert.alert('error', response.message);
-        }
-      });
+
+    if (!result.cancelled) {
+      setImage(result.uri);
+    }
   };
+
+  let handleSubmit = (e) => {
+    e.preventDefault();
+    let form_data = new FormData();
+    form_data.append('image', {
+      uri: image,
+      name: 'test.jpg',
+      type: 'image/jpeg'
+    });
+    let url = "http://192.168.1.152:8000/api/id-card/";
+    // let url = "http://127.0.0.1:8000/api/id-card/";
+    axios.post(url, form_data, {
+      headers: {
+        'content-type': 'multipart/form-data'
+      }
+    })
+        .then(res => {
+          console.log(res.data);
+          setSelectedInfor(res.data);
+        })
+        .catch(err => console.log(err)) 
+  }
+
+
+    // console.log(infor.name);
 
   return (
     <View style={styles.container}>
       <View style={styles.containerlayout}>
-        {selectedImage !== null ? (
+        {image !== null ? (
           <Image
-            source={{ uri: selectedImage.localUri }}
+            source={{ uri: image.localUri }}
             style={styles.thumbnail}
           />
         ) : (
@@ -437,82 +497,95 @@ const mhC = ({ navigation, route }) => {
             style={{ width: 200, height: 130 }}
           />
         )}
-        <TouchableOpacity style={styles.button1} onPress={openImagePickerAsync}>
-          <Text style={styles.text1}>CHỌN FILE ẢNH TỪ MÁY</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={pickImage}>
+          <LinearGradient
+            colors={['seagreen', 'darkgreen', '#192f6a']}
+            style={styles.linearGradient}>
+            <Text style={styles.text}>Upload File</Text>
+          </LinearGradient>
         </TouchableOpacity>
         <View style={styles.form}>
           <Text style={styles.text2}>Thông tin trên thẻ sinh viên</Text>
           <View style={styles.row}>
-            <Text style={{ marginRight: 15, fontWeight: '' }}>Trường :</Text>
-            <TextInput
+            <Text style={{ marginRight: 25, fontWeight: '' }}>Trường :</Text>
+            <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 160,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.id_card_number}
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ marginRight: 7 }}>Mã số sv :</Text>
-            <TextInput
+            <Text style={{ marginRight: 17 }}>Mã số sv :</Text>
+            <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 157,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.id_card_number}
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ marginRight: 18 }}>Họ tên :</Text>
-            <TextInput
+            <Text style={{ marginRight: 32 }}>Họ tên :</Text>
+            <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 160,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.id_card_number}
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ marginRight: 18 }}>Ngành :</Text>
-            <TextInput
+            <Text style={{ marginRight: 29 }}>Ngành :</Text>
+            <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 158,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.id_card_number}
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ marginRight: 2 }}>Khóa học :</Text>
-            <TextInput
+            <Text style={{ marginRight: 14 }}>Khóa học :</Text>
+            <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: 156,
+                width: 200,
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
                 backgroundColor: '#D3D3D3',
               }}
+              value = {selectInfor.id_card_number}
             />
           </View>
-          <TouchableOpacity style={styles.button}>
-            <LinearGradient
-              colors={['seagreen', 'darkgreen', '#192f6a']}
-              style={styles.linearGradient1}>
-              <Text style={styles.text}>Trích Xuất</Text>
-            </LinearGradient>
+           <TouchableOpacity
+          style={styles.button}
+          onPress={handleSubmit}>
+          <LinearGradient
+            colors={['seagreen', 'darkgreen', '#192f6a']}
+            style={styles.linearGradient}>
+            <Text style={styles.text}>Trích xuất</Text>
+          </LinearGradient>
           </TouchableOpacity>
         </View>
       </View>
@@ -613,8 +686,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 10,
-    width: 250,
-    height: 350,
+    width: 600,
+    height: 400,
     backgroundColor: 'white',
     borderRadius: 10,
   },
@@ -646,11 +719,7 @@ const styles = StyleSheet.create({
     height: 130,
     resizeMode: 'contain',
   },
-  button2: {
-    width: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-    color: 'white',
-  },
+ 
 });
+
+
