@@ -110,7 +110,7 @@ export const mhA = ({ navigation, route }) => {
       name: 'test.jpg',
       type: 'image/jpeg'
     });
-    let url = "http://192.168.1.153:8000/api/id-card/"; // get ip address of current device
+    let url = "http://192.168.1.156:8000/api/id-card/"; // get ip address of current device
     // let url = "http://127.0.0.1:8000/api/id-card/";
     axios.post(url, form_data, {
       headers: {
@@ -248,11 +248,11 @@ export const mhA = ({ navigation, route }) => {
             />
           </View>
           <View style={styles.row}>
-            <Text style={{  width:'30%'}}>Có giá trị đến</Text>
+            <Text style={{  width:'35%'}}>Có giá trị đến :</Text>
             <TextInput selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: '70%',
+                width: '64.5%',
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
@@ -302,7 +302,7 @@ const mhB = ({ navigation, route }) => {
       name: 'test.jpg',
       type: 'image/jpeg'
     });
-    let url = "http://192.168.1.153:8000/api/driving-license/"; // get ip address of current device
+    let url = "http://192.168.1.156:8000/api/driving-license/"; // get ip address of current device
     axios.post(url, form_data, {
       headers: {
         'content-type': 'multipart/form-data'
@@ -426,11 +426,11 @@ const mhB = ({ navigation, route }) => {
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ width:'30%', }}>Có giá trị đến</Text>
+            <Text style={{ width:'35%', }}>Có giá trị đến :</Text>
             <TextInput selectTextOnFocus={false}
               style={{
                 height: 20,
-                width: '70%',
+                width: '64.5%',
                 borderColor: 'gray',
                 borderWidth: 1,
                 borderRadius: 5,
@@ -480,7 +480,7 @@ const mhC = ({ navigation, route }) => {
       name: 'test.jpg',
       type: 'image/jpeg'
     });
-    let url = "http://192.168.1.153:8000/api/student-card/"; // get ip address of current device
+    let url = "http://192.168.1.156:8000/api/student-card/"; // get ip address of current device
     axios.post(url, form_data, {
       headers: {
         'content-type': 'multipart/form-data'
@@ -519,7 +519,7 @@ const mhC = ({ navigation, route }) => {
         <View style={styles.form}>
           <Text style={styles.text2}>Thông tin trên thẻ sinh viên</Text>
           <View style={styles.row}>
-            <Text style={{ width:'30%', }}>Trường :</Text>
+            <Text style={{ width:'30%', }}>MSSV :</Text>
             <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
@@ -533,7 +533,7 @@ const mhC = ({ navigation, route }) => {
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ width:'30%', }}>Mã số sv :</Text>
+            <Text style={{ width:'30%', }}>Họ tên :</Text>
             <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
@@ -547,7 +547,7 @@ const mhC = ({ navigation, route }) => {
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ width:'30%', }}>Họ tên :</Text>
+            <Text style={{ width:'30%', }}>Ngành :</Text>
             <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
@@ -561,7 +561,7 @@ const mhC = ({ navigation, route }) => {
             />
           </View>
           <View style={styles.row}>
-            <Text style={{ width:'30%', }}>Ngành :</Text>
+            <Text style={{ width:'30%', }}>Khoa :</Text>
             <TextInput  selectTextOnFocus={false}
               style={{
                 height: 20,
